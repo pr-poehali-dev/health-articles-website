@@ -6,6 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Icon from "@/components/ui/icon";
 
 const Index = () => {
@@ -20,6 +28,18 @@ const Index = () => {
   const [memoryScore, setMemoryScore] = useState(0);
   const [currentEqQuestion, setCurrentEqQuestion] = useState(0);
   const [selectedCards, setSelectedCards] = useState<number[]>([]);
+
+  // Состояние для формы вопросов
+  const [questionForm, setQuestionForm] = useState({
+    name: "",
+    email: "",
+    category: "",
+    question: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
 
   const eqQuestions = [
     {
@@ -158,12 +178,13 @@ const Index = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <Tabs defaultValue="calculator" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-8">
+          <TabsList className="grid w-full grid-cols-6 mb-8">
             <TabsTrigger value="calculator">Калькулятор калорий</TabsTrigger>
             <TabsTrigger value="products">Обзоры товаров</TabsTrigger>
             <TabsTrigger value="eq">Эмоц. интеллект</TabsTrigger>
             <TabsTrigger value="neurofitness">Нейрофитнес</TabsTrigger>
             <TabsTrigger value="materials">Материалы</TabsTrigger>
+            <TabsTrigger value="questions">Задать вопрос</TabsTrigger>
           </TabsList>
 
           {/* Калькулятор калорий */}
@@ -685,6 +706,308 @@ const Index = () => {
                   </Button>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Задать вопрос */}
+          <TabsContent value="questions" className="space-y-6">
+            <Card className="max-w-2xl mx-auto">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Icon
+                    name="MessageCircle"
+                    className="text-blue-600"
+                    size={24}
+                  />
+                  <span>Задать вопрос эксперту</span>
+                </CardTitle>
+                <p className="text-sm text-gray-600 mt-2">
+                  Есть вопрос по здоровью, питанию или психологии? Задайте его,
+                  и я подготовлю подробный ответ с планом действий.
+                </p>
+              </CardHeader>
+              <CardContent>
+                {submitStatus === "success" ? (
+                  <div className="text-center space-y-4 py-8">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                      <Icon
+                        name="CheckCircle"
+                        className="text-green-600"
+                        size={32}
+                      />
+                    </div>
+                    <h3 className="text-lg font-semibold text-green-800">
+                      Вопрос отправлен!
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Ваш вопрос принят. Ответ будет подготовлен в ближайшее
+                      время и появится на сайте.
+                    </p>
+                    <Button
+                      onClick={() => {
+                        setSubmitStatus("idle");
+                        setQuestionForm({
+                          name: "",
+                          email: "",
+                          category: "",
+                          question: "",
+                        });
+                      }}
+                      variant="outline"
+                    >
+                      Задать еще вопрос
+                    </Button>
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      setIsSubmitting(true);
+
+                      // Имитация отправки формы
+                      setTimeout(() => {
+                        setIsSubmitting(false);
+                        setSubmitStatus("success");
+                      }, 1500);
+                    }}
+                    className="space-y-4"
+                  >
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Имя
+                        </label>
+                        <Input
+                          value={questionForm.name}
+                          onChange={(e) =>
+                            setQuestionForm((prev) => ({
+                              ...prev,
+                              name: e.target.value,
+                            }))
+                          }
+                          placeholder="Как к вам обращаться?"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Email
+                        </label>
+                        <Input
+                          type="email"
+                          value={questionForm.email}
+                          onChange={(e) =>
+                            setQuestionForm((prev) => ({
+                              ...prev,
+                              email: e.target.value,
+                            }))
+                          }
+                          placeholder="your@email.com"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Тема вопроса
+                      </label>
+                      <Select
+                        value={questionForm.category}
+                        onValueChange={(value) =>
+                          setQuestionForm((prev) => ({
+                            ...prev,
+                            category: value,
+                          }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите тему" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="nutrition">
+                            🍎 Питание и диета
+                          </SelectItem>
+                          <SelectItem value="fitness">
+                            💪 Фитнес и тренировки
+                          </SelectItem>
+                          <SelectItem value="psychology">
+                            🧠 Психология и стресс
+                          </SelectItem>
+                          <SelectItem value="neurofitness">
+                            ⚡ Нейрофитнес
+                          </SelectItem>
+                          <SelectItem value="emotional">
+                            💭 Эмоциональный интеллект
+                          </SelectItem>
+                          <SelectItem value="health">
+                            ❤️ Общее здоровье
+                          </SelectItem>
+                          <SelectItem value="products">
+                            🛍️ Товары для здоровья
+                          </SelectItem>
+                          <SelectItem value="other">❓ Другое</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Ваш вопрос
+                      </label>
+                      <Textarea
+                        value={questionForm.question}
+                        onChange={(e) =>
+                          setQuestionForm((prev) => ({
+                            ...prev,
+                            question: e.target.value,
+                          }))
+                        }
+                        placeholder="Опишите ваш вопрос подробно. Чем больше деталей, тем точнее будет ответ..."
+                        rows={6}
+                        required
+                      />
+                    </div>
+
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="flex items-start space-x-2">
+                        <Icon
+                          name="Info"
+                          className="text-blue-600 mt-0.5"
+                          size={16}
+                        />
+                        <div className="text-sm text-blue-800">
+                          <p className="font-medium mb-1">Что будет дальше?</p>
+                          <ul className="text-xs space-y-1">
+                            <li>
+                              • Ваш вопрос будет рассмотрен в течение 1-2 дней
+                            </li>
+                            <li>
+                              • Подготовлю подробный ответ с планом действий
+                            </li>
+                            <li>
+                              • При необходимости создам обзор товаров или
+                              программу
+                            </li>
+                            <li>
+                              • Ответ появится на сайте в соответствующем
+                              разделе
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={
+                        isSubmitting ||
+                        !questionForm.name ||
+                        !questionForm.email ||
+                        !questionForm.category ||
+                        !questionForm.question
+                      }
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Icon
+                            name="Loader2"
+                            className="animate-spin mr-2"
+                            size={16}
+                          />
+                          Отправляем вопрос...
+                        </>
+                      ) : (
+                        <>
+                          <Icon name="Send" className="mr-2" size={16} />
+                          Отправить вопрос
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Популярные темы */}
+            <div className="max-w-4xl mx-auto">
+              <h3 className="text-lg font-semibold mb-4 text-center">
+                Популярные темы для вопросов
+              </h3>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card
+                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() =>
+                    setQuestionForm((prev) => ({
+                      ...prev,
+                      category: "nutrition",
+                    }))
+                  }
+                >
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl mb-2">🍎</div>
+                    <h4 className="font-medium text-sm">Питание и диета</h4>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Планы питания, рецепты, БЖУ
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() =>
+                    setQuestionForm((prev) => ({
+                      ...prev,
+                      category: "fitness",
+                    }))
+                  }
+                >
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl mb-2">💪</div>
+                    <h4 className="font-medium text-sm">Фитнес и тренировки</h4>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Программы, упражнения, мотивация
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() =>
+                    setQuestionForm((prev) => ({
+                      ...prev,
+                      category: "psychology",
+                    }))
+                  }
+                >
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl mb-2">🧠</div>
+                    <h4 className="font-medium text-sm">Психология</h4>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Стресс, мотивация, привычки
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() =>
+                    setQuestionForm((prev) => ({
+                      ...prev,
+                      category: "products",
+                    }))
+                  }
+                >
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl mb-2">🛍️</div>
+                    <h4 className="font-medium text-sm">Товары для здоровья</h4>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Обзоры, рекомендации, выбор
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
